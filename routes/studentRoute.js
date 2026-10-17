@@ -97,6 +97,46 @@ router.post("/", async (req, res) => {
 });
 
 // 4. Update student
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, email, age, grade, major } = req.body;
+
+  const students = await getAllStudents();
+  const studentIndex = students.findIndex((student) => student.id === Number(id));
+
+  if (studentIndex === -1) {
+    return res.status(404).json({ error: "Student not found" });
+  }
+
+  // Update the student information
+  students[studentIndex] = {
+    ...students[studentIndex],
+    name: name || students[studentIndex].name,
+    email: email || students[studentIndex].email,
+    age: age || students[studentIndex].age,
+    grade: grade || students[studentIndex].grade,
+    major: major || students[studentIndex].major,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await writeStudents(students);
+  res.json(students[studentIndex]);
+});
+
 // 5. Delete student
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const students = await getAllStudents();
+  const studentIndex = students.findIndex((student) => student.id === Number(id));
+
+  if (studentIndex === -1) {
+    return res.status(404).json({ error: "Student not found" });
+  }
+
+  students.splice(studentIndex, 1);
+  await writeStudents(students);
+  res.json({ message: "Student deleted successfully" });
+});
 
 export default router;
